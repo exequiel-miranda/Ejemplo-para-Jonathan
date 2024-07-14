@@ -36,21 +36,22 @@ class iniciarsesion : AppCompatActivity() {
         val btninicarsesion = findViewById<Button>(R.id.btniniciarsesionhome)
         val btnVolver = findViewById<ImageButton>(R.id.btnVolverIS)
 
-        GlobalScope.launch(Dispatchers.IO) {
-
-            val objConexion = ClaseConexion().cadenaConexion()
-            val resulSet = objConexion?.prepareStatement("SELECT rol FROM tbUsuariosOne WHERE correo_usuario = ? ")!!
-            resulSet.setString(1, txtcorreoiniciar.text.toString())
-
-            val resultado = resulSet.executeQuery()
-
-            if (resultado.next()) {
-                valorRolUsuario = resultado.getString("rol")
-                println("este es el uuid traido desde el if $valorRolUsuario")
-            }
-        }
 
         btninicarsesion.setOnClickListener {
+            GlobalScope.launch(Dispatchers.IO) {
+                val objConexion = ClaseConexion().cadenaConexion()
+
+                val resulSet =
+                    objConexion?.prepareStatement("SELECT rol FROM tbUsuariosOne WHERE correo_usuario = ? ")!!
+                resulSet.setString(1, txtcorreoiniciar.text.toString())
+                val resultado = resulSet.executeQuery()
+
+                if (resultado.next()) {
+                    valorRolUsuario = resultado.getString("rol")
+
+                }
+            }
+
             val pantallaprincipal = Intent(this, MainActivity::class.java)
             startActivity(pantallaprincipal)
         }

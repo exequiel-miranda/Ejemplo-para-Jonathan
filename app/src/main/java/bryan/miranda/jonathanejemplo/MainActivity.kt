@@ -1,26 +1,24 @@
 package bryan.miranda.jonathanejemplo
 
+//import bryan.miranda.jonathanejemplo.iniciarsesion.variablesLogin.valorRolUsuario
 import android.os.Bundle
 import android.view.Menu
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.navigation.NavigationView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.AppCompatActivity
 import bryan.miranda.jonathanejemplo.databinding.ActivityMainBinding
-import bryan.miranda.jonathanejemplo.iniciarsesion.variablesLogin.valorRolUsuario
 import bryan.miranda.jonathanejemplo.modelo.ClaseConexion
+import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-
-    lateinit var RolUsuarioMainActivity: String
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -48,26 +46,28 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
             ), drawerLayout
         )
-
-        GlobalScope.launch(Dispatchers.IO) {
+        fun traerID(): String? {
+            var uuidRol: String? = null
             val objConexion = ClaseConexion().cadenaConexion()
-            val resulSet = objConexion?.prepareStatement("SELECT rol FROM tbUsuariosOne WHERE nombre_rol = ?")!!
-            resulSet.setString(1, "Dueno mascota")
-            val resultado = resulSet.executeQuery()
+            val statement = objConexion?.createStatement()
+            val resulSet =
+                statement?.executeQuery("SELECT UUID_rol FROM tbRolesUsuarios WHERE nombre_rol = 'Dueno Mascota'")!!
 
-            if (resultado.next()) {
-                 RolUsuarioMainActivity = resultado.getString("rol")
-                println("este es el uuid traido desde el if $RolUsuarioMainActivity")
+            if (resulSet.next()) {
+                uuidRol = resulSet.getString("UUID_rol")
             }
+            return uuidRol
         }
 
-        val txtcorreoiniciarval = iniciarsesion.variablesLogin.valorRolUsuario
 
-
-        if (txtcorreoiniciarval == RolUsuarioMainActivity) {
-            navView.menu.findItem(R.id.nav_slideshow).isVisible = true
-        } else {
-            navView.menu.findItem(R.id.nav_slideshow).isVisible = false
+        CoroutineScope(Dispatchers.IO).launch {
+            val txtcorreoiniciarval = iniciarsesion.variablesLogin.valorRolUsuario
+            val RolUsuarioMainActivity = traerID()
+            if (txtcorreoiniciarval == RolUsuarioMainActivity) {
+                navView.menu.findItem(R.id.nav_slideshow).isVisible = true
+            } else {
+                navView.menu.findItem(R.id.nav_slideshow).isVisible = false
+            }
         }
 
         setupActionBarWithNavController(navController, appBarConfiguration)
